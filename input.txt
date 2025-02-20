@@ -1,28 +1,10 @@
-1 26 26
-DEFAULT
+3 3 6
+PYRAMID
 A
-B
-C
-D
+AA
+BB
+CC
+DDD
 E
+EE
 F
-G
-H
-I
-J
-K
-L
-M
-N
-O
-P
-Q
-R
-S
-T
-U
-V
-W
-X
-Y
-Z

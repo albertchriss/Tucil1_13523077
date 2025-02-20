@@ -5,7 +5,8 @@ public class Solver {
     private Block[] blocks;
     private int width, length, height = 1, counter, luas = 0;
     private boolean validMap = true;
-    private String errorMsg;
+    private String errorMsg, mode;
+    private boolean[] placed;
 
     public Solver(int length, int width, String[] input, Block[] blocks){
         this.length = length;
@@ -42,6 +43,12 @@ public class Solver {
             }
         }
         this.blocks = blocks;
+        this.mode = "CUSTOM";
+
+        this.placed = new boolean[blocks.length];
+        for (int i = 0; i < placed.length; i++){
+            placed[i] = false;
+        }
     }
 
     public Solver(int length, int width, Block[] blocks){
@@ -55,6 +62,11 @@ public class Solver {
         }
         this.blocks = blocks;
         this.luas = length * width;
+        this.mode = "DEFAULT";
+        this.placed = new boolean[blocks.length];
+        for (int i = 0; i < placed.length; i++){
+            placed[i] = false;
+        }
     }
 
     public Solver(int length, int width, int height, Block[] blocks){
@@ -66,49 +78,105 @@ public class Solver {
         }
         this.height = height;
         this.map = new int[length][width][height];
-        for (int i = 0; i < length; i++){
-            for (int j = 0; j < width; j++){
-                for (int k = 0; k < height; k++){
-                    map[i][j][k] = 0;
+        for (int k = 0; k < height; k++){
+            for (int i = 0; i < length; i++){
+                for (int j = 0; j < width; j++){
+                    if (i >= k && j >= k){
+                        map[i][j][k] = 0;
+                        this.luas++;
+                    }
+                    else{
+                        map[i][j][k] = -1;
+                    }
                 }
             }
         }
         this.blocks = blocks;
-        this.luas = length * width * height;
+        this.mode = "PYRAMID";
+        this.placed = new boolean[blocks.length];
+        for (int i = 0; i < placed.length; i++){
+            placed[i] = false;
+        }
     }
 
+    // normal
     private boolean place(Block block, int row, int col){
         boolean ok = true;
-        for (int i = 0; i < block.getLength(); i++){
-            for (int j = 0; j < block.getWidth(); j++){
+        for (int i = 0; i < block.getSize(); i++){
+            for (int j = 0; j < block.getSize(); j++){
                 int mapi = i + row, mapj = j + col;
                 if (mapi >= this.length || mapj >= this.width){
-                    if (block.block[i][j] > 0)
+                    if (block.block[i][j][0] > 0)
                         ok = false;
                     continue;
                 }
-                if (block.block[i][j] > 0 && (this.map[mapi][mapj][0] > 0 || this.map[mapi][mapj][0] == -1)){
+                if (block.block[i][j][0] > 0 && (this.map[mapi][mapj][0] > 0 || this.map[mapi][mapj][0] == -1)){
                     ok = false;
                 }
             }
         }
         if (!ok) return false;
-        for (int i = 0; i < block.getLength(); i++){
-            for (int j = 0; j < block.getWidth(); j++){
+        for (int i = 0; i < block.getSize(); i++){
+            for (int j = 0; j < block.getSize(); j++){
                 int mapi = i + row, mapj = j + col;
-                if (mapi < this.length && mapj < this.width && block.block[i][j] > 0)
-                    this.map[mapi][mapj][0] = block.block[i][j];
+                if (mapi < this.length && mapj < this.width && block.block[i][j][0] > 0)
+                    this.map[mapi][mapj][0] = block.block[i][j][0];
             }
         }
         return true;
     }
 
+    // pyramid
+    private boolean place(Block block, int row, int col, int height){
+        boolean ok = true;
+        for (int i = 0; i < block.getSize(); i++){
+            for (int j = 0; j < block.getSize(); j++){
+                for (int k = 0; k < block.getSize(); k++){
+                    int mapi = i + row, mapj = j + col, mapk = k + height;
+                    if (mapi >= this.length || mapj >= this.width || mapk >= this.height){
+                        if (block.block[i][j][k] > 0)
+                            ok = false;
+                        continue;
+                    }
+                    if (block.block[i][j][k] > 0 && (this.map[mapi][mapj][mapk] > 0 || this.map[mapi][mapj][mapk] == -1)){
+                        ok = false;
+                    }
+                }
+            }
+        }
+        if (!ok) return false;
+        for (int i = 0; i < block.getSize(); i++){
+            for (int j = 0; j < block.getSize(); j++){
+                for (int k = 0; k < block.getSize(); k++){
+                    int mapi = i + row, mapj = j + col, mapk = k + height;
+                    if (mapi < this.length && mapj < this.width && mapk < this.height && block.block[i][j][k] > 0)
+                        this.map[mapi][mapj][mapk] = block.block[i][j][k];
+                }
+            }
+        }
+        return true;
+    }
+
+    // normal
     private void unplace(Block block, int row, int col){
-        for (int i = 0; i < block.getLength(); i++){
-            for (int j = 0; j < block.getWidth(); j++){
+        for (int i = 0; i < block.getSize(); i++){
+            for (int j = 0; j < block.getSize(); j++){
                 int mapi = i + row, mapj = j + col;
-                if (mapi < this.length && mapj < this.width && block.block[i][j] > 0)
+                if (mapi < this.length && mapj < this.width && block.block[i][j][0]> 0)
                     this.map[mapi][mapj][0] = 0;
+            }
+        }
+    }
+
+    // pyramid
+    private void unplace(Block block, int row, int col, int height){
+        for (int i = 0; i < block.getSize(); i++){
+            for (int j = 0; j < block.getSize(); j++){
+                for (int k = 0; k < block.getSize(); k++){
+                    int mapi = i + row, mapj = j + col, mapk = k + height;
+                    if (mapi < this.length && mapj < this.width && mapk < this.height && block.block[i][j][k] > 0)
+                        this.map[mapi][mapj][mapk] = 0;
+                }
             }
         }
     }
@@ -123,39 +191,61 @@ public class Solver {
         }
         return true;
     }
+
+    private boolean isPyramidSolved(){
+        for (int k = 0; k < this.height; k++){
+            for (int i = k; i < this.length; i++){
+                for (int j = k; j < this.width; j++){
+                    if (this.map[i][j][k] == 0) return false;
+                }
+            }
+        }
+        return true;
+    }
+
     private boolean solveHelper(int blockidx, int i, int j, int rotate){
         this.counter++;
-        if (rotate == 8){
-            return solveHelper(blockidx, i, j+1, 0);
-        }
-        if (j >= this.width){
-            return solveHelper(blockidx, i+1, 0, rotate);
-        }
-        if (i >= this.length){
-            return solveHelper(blockidx + 1, 0, 0, rotate);
-        }
-        if (blockidx >= blocks.length){
-            if (isMapFull()) return true;
-            else return false;
-            // return true;
-        }
-        Block currBlock = blocks[blockidx];
+        if (rotate == 8) return solveHelper(blockidx, i, j+1, 0);
+        if (j >= this.width) return solveHelper(blockidx, i+1, 0, rotate);
+        if (i >= this.length) return false;
+        if (blockidx >= blocks.length) return isMapFull();
+        Block currBlock = new Block(blocks[blockidx]);
         // rotate block
-        for (int temp = 0; temp < rotate%4; temp++)
-            currBlock.rotate();
-        if (rotate >= 4)
-            currBlock.mirror();
+        for (int temp = 0; temp < rotate%4; temp++) currBlock.rotate();
+        if (rotate >= 4) currBlock.mirror();
 
         if (place(currBlock, i, j)){
-            if (solveHelper(blockidx+1, 0, 0, 1) && isMapFull()){
-                return true;
-            }
-            else{
-                unplace(currBlock, i, j);
-            }
+            if (solveHelper(blockidx+1, 0, 0, 0) && isMapFull()) return true;
+            
+            else unplace(currBlock, i, j);
         }
         return solveHelper(blockidx, i, j, rotate+1);
     }
+
+    private boolean solveHelper(int blockidx, int i, int j, int k, int rotate){
+        this.counter++;
+        if (rotate == 24) return solveHelper(blockidx, i, j, k+1, 0);
+        if (k >= this.height) return solveHelper(blockidx, i, j+1, 0, rotate);
+        if (j >= this.width) return solveHelper(blockidx, i+1, 0, 0, rotate);
+        if (i >= this.length) return false;
+        if (blockidx >= blocks.length) return isPyramidSolved();
+        Block currBlock = new Block(blocks[blockidx]);
+        // rotate block
+        int lift = rotate / 8, rotate2 = rotate % 8;
+        for (int temp = 0; temp < rotate2%4; temp++) currBlock.rotate();
+        if (rotate2 >= 4) currBlock.mirror();
+        if (lift >= 1) currBlock.lift();
+        if (lift == 2) currBlock.mirrorLift();
+
+
+
+        if (place(currBlock, i, j, k)){
+            if (solveHelper(blockidx+1, 0, 0, 0, 0) && isPyramidSolved()) return true;
+            else unplace(currBlock, i, j, k);
+        }
+        return solveHelper(blockidx, i, j, k, rotate+1);
+    }
+
     public void solve(){
         if (!validMap){
             System.out.println(errorMsg);
@@ -173,11 +263,21 @@ public class Solver {
 
         this.counter = 0;
         java.time.LocalTime time = java.time.LocalTime.now();
-        if (solveHelper(0, 0, 0, 0)){
-            this.print();
+        if (this.mode.equals("PYRAMID")){
+            if (solveHelper(0, 0, 0, 0, 0)){
+                this.printPyramid();
+            }
+            else{
+                System.out.println("Not Solvable");
+            }
         }
-        else{
-            System.out.println("Not Solvable");
+        else {
+            if (solveHelper(0, 0, 0, 0)){
+                this.print();
+            }
+            else{
+                System.out.println("Not Solvable");
+            }
         }
         java.time.Duration duration = java.time.Duration.between(time, java.time.LocalTime.now());
         System.out.println("\nBanyak kasus yang ditinjau: " + counter);
@@ -190,6 +290,21 @@ public class Solver {
                     colorPrint((char) this.map[i][j][0]);
                 else
                     System.out.print(" ");
+            }
+            System.out.println();
+        }
+    }
+
+    public void printPyramid(){
+        for (int k = this.height-1; k >= 0; k--){
+            for (int i = k; i < this.length; i++){
+                for (int j = k; j < this.width; j++){
+                    if (map[i][j][k] > 0)
+                        colorPrint((char) this.map[i][j][k]);
+                    else
+                        System.out.print(" ");
+                }
+                System.out.println();
             }
             System.out.println();
         }

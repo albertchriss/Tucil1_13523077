@@ -34,9 +34,9 @@ public class FileReader {
             this.numBlocks = Integer.parseInt(firstLine[2]);
 
             this.mode = lines.get(1);
-            if (!this.mode.equals("DEFAULT") && !this.mode.equals("CUSTOM") && !this.mode.equals("RANDOM")){
+            if (!this.mode.equals("DEFAULT") && !this.mode.equals("CUSTOM") && !this.mode.equals("PYRAMID")){
                 this.validInput = false;
-                this.errorMsg = "Invalid mode! Mode must be either DEFAULT, CUSTOM, or RANDOM";
+                this.errorMsg = "Invalid mode! Mode must be either DEFAULT, CUSTOM, or PYRAMID";
                 return;
             }
 
@@ -98,7 +98,7 @@ public class FileReader {
             }
             this.map[i] = line;
         }
-        
+
         return true;
     }
 
