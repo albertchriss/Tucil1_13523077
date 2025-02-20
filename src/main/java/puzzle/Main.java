@@ -8,8 +8,13 @@ public class Main{
             System.out.println(reader.errorMsg);
             return;
         }
-
-        Solver solver = new Solver(reader.row, reader.col, reader.blocks);
-        solver.solve();
+        if (reader.mode.equals("DEFAULT")){
+            Solver solver = new Solver(reader.row, reader.col, reader.blocks);
+            solver.solve();
+        }
+        else if (reader.mode.equals("CUSTOM")){
+            Solver solver = new Solver(reader.row, reader.col, reader.map, reader.blocks);
+            solver.solve();
+        }
     }
 }

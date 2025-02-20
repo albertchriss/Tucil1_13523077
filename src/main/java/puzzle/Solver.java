@@ -147,12 +147,6 @@ public class Solver {
             currBlock.mirror();
 
         if (place(currBlock, i, j)){
-            // this.print();
-            // System.out.println();
-            // currBlock.print();
-            // System.out.println();
-            // solveHelper(blockidx+1, 0, 0, 1);
-            // unplace(currBlock, i, rotate);
             if (solveHelper(blockidx+1, 0, 0, 1) && isMapFull()){
                 return true;
             }
@@ -177,26 +171,33 @@ public class Solver {
             return;
         }
 
-
         this.counter = 0;
+        java.time.LocalTime time = java.time.LocalTime.now();
         if (solveHelper(0, 0, 0, 0)){
             this.print();
         }
         else{
             System.out.println("Not Solvable");
         }
-        System.out.println(counter);
+        java.time.Duration duration = java.time.Duration.between(time, java.time.LocalTime.now());
+        System.out.println("\nBanyak kasus yang ditinjau: " + counter);
+        System.out.println("\nWaktu pencarian: " + duration.toMillis() + " ms");
     }
     public void print(){
         for (int i = 0; i < this.length; i++){
             for (int j = 0; j < this.width; j++){
                 if (map[i][j][0] > 0)
-                    System.out.print((char) this.map[i][j][0]);
+                    colorPrint((char) this.map[i][j][0]);
                 else
-                    System.out.print("X");
+                    System.out.print(" ");
             }
             System.out.println();
         }
+    }
+
+    private void colorPrint(char c){
+        int colorCode = (c - 'A') + 1; 
+        System.out.print("\u001B[38;5;" + colorCode + "m" + c + "\u001B[0m");
     }
 
 }

@@ -8,6 +8,7 @@ import java.util.List;
 public class FileReader {
 
     public int row, col, numBlocks;
+    public String[] map;
     public Block[] blocks;
     public boolean validInput = true;
     public String mode, errorMsg;
@@ -39,7 +40,16 @@ public class FileReader {
                 return;
             }
 
-            List<String> blockLines = lines.subList(2, lines.size());
+            int startBlockIdx = 2;
+            if (this.mode.equals("CUSTOM")){
+                List<String> mapLines = lines.subList(2, 2+this.row);
+                startBlockIdx += this.row;
+                if (!parseMap(mapLines, mode)){
+                    return;
+                }
+            }
+
+            List<String> blockLines = lines.subList(startBlockIdx, lines.size());
             if (!parseBlocks(blockLines)){
                 this.validInput = false;
                 this.errorMsg = "Invalid blocks input!";
@@ -50,6 +60,46 @@ public class FileReader {
             this.validInput = false;
             this.errorMsg = ("Error reading file: " + e.getMessage());
         }
+    }
+
+    private boolean parseMap(List<String> lines, String mode){
+        if (this.row != lines.size()){
+            this.validInput = false;
+            this.errorMsg = "Invalid map! Number of rows must be equal to N!";
+            return false;
+        }
+        for (int i = 0; i < lines.size(); i++){
+            if (this.col != lines.get(i).length()){
+                this.validInput = false;
+                this.errorMsg = "Invalid map! Number of columns must be equal to M!";
+                return false;
+            }
+        }
+
+        if (mode.equals("PYRAMID")) {
+            if (this.row != this.col){
+                this.validInput = false;
+                this.errorMsg = "Invalid map for pyramid! N must be equal to M!";
+                return false;
+            }
+            this.map = new String[this.row];
+        }
+        else{
+            this.map = new String[this.row];
+        }
+
+        for(int i = 0; i < this.row; i++){
+            String line = lines.get(i);
+            for (int j = 0; j < this.col; j++){
+                if(line.charAt(i) != 'X' && line.charAt(i) != '.'){
+                    this.validInput = false;
+                    this.errorMsg = "Invalid map! Map must only contain \'.\' or \'X\' character!";
+                }
+            }
+            this.map[i] = line;
+        }
+        
+        return true;
     }
 
     private boolean parseBlocks(List<String> lines){
