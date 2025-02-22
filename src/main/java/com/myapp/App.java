@@ -17,7 +17,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("main"));
+        scene = new Scene(loadFXML("main-controller"));
         stage.setScene(scene);
         stage.setResizable(false);
         stage.setTitle("IQ Puzzle Pro Solver");
