@@ -1,6 +1,11 @@
 # Tucil Strategi Algoritma 1
 
-## Cara Menjalankan GUI
+# Cara Menjalankan GUI
+1. Pastikan Java Development Kit (JDK) telah terinstall.
+2. Lakukan *clone* repository atau klik link berikut untuk melakukan proses [download](https://github.com/albertchriss/Tucil1_13523077/raw/refs/heads/main/iq-puzzler-solver.jar) file executable `iq-puzzler-solver.jar`.
+3. _Double click_ file executable `iq-puzzler-solver.jar` untuk menjalankan GUI program.
+
+## Alternatif Cara Menjalankan GUI
 ### Setup
 GUI proyek ini di-*build* menggunakan Maven (sebuah *build tool* untuk JavaFX). Berikut adalah langkah-langkah untuk melakukan *setup* Maven.
 1. Pastikan Java Development Kit (JDK) sudah terinstall.
