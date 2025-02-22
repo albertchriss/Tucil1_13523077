@@ -10,10 +10,11 @@ public class FileReader {
     public int row, col, numBlocks;
     public String[] map;
     public Block[] blocks;
-    public boolean validInput = true;
+    public boolean validInput;
     public String mode, errorMsg;
 
     public void readInput(Path filePath){
+        this.validInput = true;
         try {
             List<String> lines = Files.readAllLines(filePath);
             String[] firstLine = lines.get(0).split(" ");
@@ -62,7 +63,38 @@ public class FileReader {
         }
     }
 
+    public void readInput(String row, String col, String mode, String numBlocks, String blocks, String map){
+        this.validInput = true;
+        if (!isNumeric(row) || !isNumeric(col) || !isNumeric(numBlocks)){
+            this.validInput = false;
+            this.errorMsg = "Invalid input! N, M, and P must be integers!";
+            return;
+        }
+        this.row = Integer.parseInt(row);
+        this.col = Integer.parseInt(col);
+        this.numBlocks = Integer.parseInt(numBlocks);
+        this.mode = mode;
+
+        if (mode.equals("CUSTOM")){
+            List<String> mapLines = java.util.Arrays.asList(map.split("\n"));
+            if (!parseMap(mapLines, mode))
+                return;
+        }
+
+        List<String> blockLines = java.util.Arrays.asList(blocks.split("\n"));
+        if (!parseBlocks(blockLines)){
+            this.validInput = false;
+            this.errorMsg = "Invalid blocks input!";
+            return;
+        }
+    }
+
     private boolean parseMap(List<String> lines, String mode){
+        if (lines == null || lines.size() == 0){
+            this.validInput = false;
+            this.errorMsg = "Invalid map! Map must not be empty!";
+            return false;
+        }
         if (this.row != lines.size()){
             this.validInput = false;
             this.errorMsg = "Invalid map! Number of rows must be equal to N!";
@@ -103,6 +135,9 @@ public class FileReader {
     }
 
     private boolean parseBlocks(List<String> lines){
+        if (lines == null || lines.size() == 0){
+            return false;
+        }
         this.blocks = new Block[this.numBlocks];
         List<String> temp = new java.util.ArrayList<>();
         int j = 0;
@@ -140,6 +175,23 @@ public class FileReader {
 
         if (j != this.numBlocks) return false;
         return true;
+    }
+
+    public String getMapAsString(){
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.row; i++){
+            sb.append(this.map[i]);
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    public String getBlocksAsString(){
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.numBlocks; i++){
+            sb.append(this.blocks[i].getBlockAsString());
+        }
+        return sb.toString();
     }
 
     private char getChar(String s){

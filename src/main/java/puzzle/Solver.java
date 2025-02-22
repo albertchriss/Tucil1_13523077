@@ -7,6 +7,9 @@ public class Solver {
     private boolean validMap = true;
     private String errorMsg, mode;
     private boolean[] placed;
+    private java.time.Duration duration;
+    public boolean isSolved;
+    public String solveMsg;
 
     public Solver(int length, int width, String[] input, Block[] blocks){
         this.length = length;
@@ -97,6 +100,30 @@ public class Solver {
         for (int i = 0; i < placed.length; i++){
             placed[i] = false;
         }
+    }
+
+    public int[][][] getMap(){
+        return this.map;
+    }
+
+    public int getWidth(){
+        return this.width;
+    }
+
+    public int getLength(){
+        return this.length;
+    }
+
+    public int getHeight(){
+        return this.height;
+    }
+
+    public int getCounter(){
+        return this.counter;
+    }
+
+    public int getDuration(){
+        return (int) duration.toMillis();
     }
 
     // normal
@@ -248,7 +275,9 @@ public class Solver {
 
     public void solve(){
         if (!validMap){
-            System.out.println(errorMsg);
+            // System.out.println(errorMsg);
+            this.isSolved = false;
+            this.solveMsg = errorMsg;
             return;
         }
         
@@ -257,7 +286,8 @@ public class Solver {
             totalluas += blocks[i].getLuas();
         }
         if (totalluas != this.luas){
-            System.out.println("Not Solvable! Total area of blocks must be equal to the area of the map!");
+            this.isSolved = false;
+            this.solveMsg = "Not Solvable! Total area of blocks must be equal to the area of the map!";
             return;
         }
 
@@ -266,20 +296,24 @@ public class Solver {
         if (this.mode.equals("PYRAMID")){
             if (solveHelper(0, 0, 0, 0, 0)){
                 this.printPyramid();
+                this.isSolved = true;
             }
             else{
-                System.out.println("Not Solvable");
+                this.isSolved = false;
+                this.solveMsg = "Not Solvable!";
             }
         }
         else {
             if (solveHelper(0, 0, 0, 0)){
+                this.isSolved = true;
                 this.print();
             }
             else{
-                System.out.println("Not Solvable");
+                this.isSolved = false;
+                this.solveMsg = "Not Solvable!";
             }
         }
-        java.time.Duration duration = java.time.Duration.between(time, java.time.LocalTime.now());
+        duration = java.time.Duration.between(time, java.time.LocalTime.now());
         System.out.println("\nBanyak kasus yang ditinjau: " + counter);
         System.out.println("\nWaktu pencarian: " + duration.toMillis() + " ms");
     }
@@ -308,6 +342,42 @@ public class Solver {
             }
             System.out.println();
         }
+    }
+
+    public String getOutput(){
+        StringBuilder sb = new StringBuilder();
+
+        if (this.mode.equals("PYRAMID")){
+            for (int k = this.height-1; k >= 0; k--){
+                for (int i = k; i < this.length; i++){
+                    for (int j = k; j < this.width; j++){
+                        if (map[i][j][k] > 0)
+                            sb.append(getColorChar((char) this.map[i][j][k]));
+                        else
+                            sb.append(" ");
+                    }
+                    sb.append("\n");
+                }
+                sb.append("\n");
+            }
+        }
+        else{
+            for (int i = 0; i < this.length; i++){
+                for (int j = 0; j < this.width; j++){
+                    if (map[i][j][0] > 0)
+                        sb.append(getColorChar((char) this.map[i][j][0]));
+                    else
+                        sb.append(" ");
+                }
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    private String getColorChar(char c){
+        int colorCode = (c - 'A') + 1; 
+        return "\u001B[38;5;" + colorCode + "m" + c + "\u001B[0m";
     }
 
     private void colorPrint(char c){

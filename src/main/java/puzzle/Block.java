@@ -2,7 +2,7 @@ package puzzle;
 
 public class Block {
     public int[][][] block;
-    private int color, size;
+    private int color, size, width, length;
 
     // Constructor
     public Block(String[] input) {
@@ -10,6 +10,8 @@ public class Block {
         for (int i = 1; i < length; i++){
             width = Math.max(width, input[i].length());
         }
+        this.length = length;
+        this.width = width;
         this.size = Math.max(length, width)*2;
         this.block = new int[size][size][size];
         this.color = (int) (input[0].charAt(0));
@@ -248,6 +250,24 @@ public class Block {
             }
         } while (empty);
 
+    }
+
+    public String getBlockAsString(){
+        boolean aktif = false;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.length; i++){
+            for (int j = this.width-1; j >= 0; j--){
+                if (this.block[i][j][0] > 0){
+                    sb.append((char) this.block[i][j][0]);
+                    aktif = true;
+                }
+                else{
+                    if (aktif) sb.append(" ");
+                }
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 
 
