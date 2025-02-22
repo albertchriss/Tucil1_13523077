@@ -1,6 +1,9 @@
 # Tucil Strategi Algoritma 1
 
-# Cara Menjalankan GUI
+## Deskripsi Program
+Program ini merupakan aplikasi pencari solusi dari permainan [**IQ Puzzler Pro**](https://www.smartgamesusa.com) dengan menggunakan algoritma _**Brute Force**_, atau menampilkan bahwa solusi tidak ditemukan jika tidak ada solusi yang mungkin dari puzzle.
+
+## Cara Menjalankan GUI
 1. Pastikan Java Development Kit (JDK) telah terinstall.
 2. Lakukan *clone* repository atau klik link berikut untuk melakukan proses [download](https://github.com/albertchriss/Tucil1_13523077/raw/refs/heads/main/iq-puzzler-solver.jar) file executable `iq-puzzler-solver.jar`.
 3. _Double click_ file executable `iq-puzzler-solver.jar` untuk menjalankan GUI program.
