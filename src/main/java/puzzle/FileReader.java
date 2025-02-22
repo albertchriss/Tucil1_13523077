@@ -20,13 +20,13 @@ public class FileReader {
             String[] firstLine = lines.get(0).split(" ");
             if (firstLine.length != 3){
                 this.validInput = false;
-                this.errorMsg = "Invalid input! First line must contain 3 integers only, N, M, and P!";
+                this.errorMsg = "Invalid input! First line must contain 3 integers only!";
                 return;
             }
             for (int i = 0; i < firstLine.length; i++){
                 if (!isNumeric(firstLine[i])){
                     this.validInput = false;
-                    this.errorMsg = "Invalid input! First line must contain 3 integers, N, M, and P!";
+                    this.errorMsg = "Invalid input! First line must contain 3 integers!";
                     return;
                 }
             }
@@ -67,12 +67,22 @@ public class FileReader {
         this.validInput = true;
         if (!isNumeric(row) || !isNumeric(col) || !isNumeric(numBlocks)){
             this.validInput = false;
-            this.errorMsg = "Invalid input! N, M, and P must be integers!";
+            this.errorMsg = "Invalid input! Row, column, and number of blocks must be integers!";
             return;
         }
         this.row = Integer.parseInt(row);
         this.col = Integer.parseInt(col);
+        if (this.row < 1 || this.col < 1){
+            this.validInput = false;
+            this.errorMsg = "Invalid input! Row and column must be greater than 0!";
+            return;
+        }
         this.numBlocks = Integer.parseInt(numBlocks);
+        if (this.numBlocks < 1){
+            this.validInput = false;
+            this.errorMsg = "Invalid input! Number of blocks must be greater than 0!";
+            return;
+        }
         this.mode = mode;
 
         if (mode.equals("CUSTOM")){
@@ -83,8 +93,6 @@ public class FileReader {
 
         List<String> blockLines = java.util.Arrays.asList(blocks.split("\n"));
         if (!parseBlocks(blockLines)){
-            this.validInput = false;
-            this.errorMsg = "Invalid blocks input!";
             return;
         }
     }
@@ -97,13 +105,13 @@ public class FileReader {
         }
         if (this.row != lines.size()){
             this.validInput = false;
-            this.errorMsg = "Invalid map! Number of rows must be equal to N!";
+            this.errorMsg = "Invalid map! Number of rows must does not match!";
             return false;
         }
         for (int i = 0; i < lines.size(); i++){
             if (this.col != lines.get(i).length()){
                 this.validInput = false;
-                this.errorMsg = "Invalid map! Number of columns must be equal to M!";
+                this.errorMsg = "Invalid map! Number of columns does not match!";
                 return false;
             }
         }
@@ -111,7 +119,7 @@ public class FileReader {
         if (mode.equals("PYRAMID")) {
             if (this.row != this.col){
                 this.validInput = false;
-                this.errorMsg = "Invalid map for pyramid! N must be equal to M!";
+                this.errorMsg = "Invalid map for pyramid! Row must be equal to Column!";
                 return false;
             }
             this.map = new String[this.row];
@@ -136,6 +144,8 @@ public class FileReader {
 
     private boolean parseBlocks(List<String> lines){
         if (lines == null || lines.size() == 0){
+            this.validInput = false;
+            this.errorMsg = "Invalid blocks input! Blocks must not be empty!";
             return false;
         }
         this.blocks = new Block[this.numBlocks];
@@ -144,13 +154,26 @@ public class FileReader {
         for (int i = 0; i < lines.size(); i++){
             String blockLine = lines.get(i);
             if (blockLine.length() == 0) continue;
-            if (!isUppercase(blockLine)) return false;
+            if (!isUppercase(blockLine)) {
+                this.validInput = false;
+                this.errorMsg = "Invalid blocks input! Block must only contain uppercase letter!";
+                return false;
+            }
+            if (!allSameChar(blockLine)) {
+                this.validInput = false;
+                this.errorMsg = "Invalid blocks input! Block must only contain one type of character!";
+                return false;
+            }
             
             if (temp.size() == 0 || getChar(temp.get(0)) == getChar(blockLine)){
                 temp.add(blockLine);
             }
             else{
-                if (j >= this.numBlocks) return false;
+                if (j >= this.numBlocks){
+                    this.validInput = false;
+                    this.errorMsg = "Invalid blocks input! Number of blocks does not match!";
+                    return false;
+                }
 
                 String[] block = new String[temp.size()];
                 for (int k = 0; k < temp.size(); k++){
@@ -163,7 +186,11 @@ public class FileReader {
             }
         }
         if (temp.size() > 0){
-            if (j >= this.numBlocks) return false;
+            if (j >= this.numBlocks) {
+                this.validInput = false;
+                this.errorMsg = "Invalid blocks input! Number of blocks does not match!";
+                return false;
+            }
             String[] block = new String[temp.size()];
             for (int k = 0; k < temp.size(); k++){
                 block[k] = temp.get(k);
@@ -173,7 +200,11 @@ public class FileReader {
             j++;
         }
 
-        if (j != this.numBlocks) return false;
+        if (j != this.numBlocks){
+            this.validInput = false;
+            this.errorMsg = "Invalid blocks input! Number of blocks does not match!";
+            return false;
+        }
         return true;
     }
 
@@ -199,6 +230,14 @@ public class FileReader {
             if (Character.isLetter(s.charAt(i))) return s.charAt(i);
         }
         return ' ';
+    }
+
+    private boolean allSameChar(String s){
+        char c = getChar(s);
+        for (int i = 0; i < s.length(); i++){
+            if (Character.isLetter(s.charAt(i)) && s.charAt(i) != c) return false;
+        }
+        return true;
     }
 
     private boolean isUppercase(String s){

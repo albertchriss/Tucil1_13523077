@@ -77,7 +77,7 @@ public class Solver {
         this.width = width;
         if (length != width){
             this.validMap = false;
-            this.errorMsg = "Invalid map for pyramid!";
+            this.errorMsg = "Invalid map for pyramid! Row must be equal to column!";
         }
         this.height = height;
         this.map = new int[length][width][height];
@@ -123,6 +123,7 @@ public class Solver {
     }
 
     public int getDuration(){
+        if (duration == null) return 0;
         return (int) duration.toMillis();
     }
 
@@ -295,6 +296,7 @@ public class Solver {
         java.time.LocalTime time = java.time.LocalTime.now();
         if (this.mode.equals("PYRAMID")){
             if (solveHelper(0, 0, 0, 0, 0)){
+                System.out.println();
                 this.printPyramid();
                 this.isSolved = true;
             }
@@ -306,6 +308,7 @@ public class Solver {
         else {
             if (solveHelper(0, 0, 0, 0)){
                 this.isSolved = true;
+                System.out.println();
                 this.print();
             }
             else{
@@ -313,9 +316,9 @@ public class Solver {
                 this.solveMsg = "Not Solvable!";
             }
         }
-        duration = java.time.Duration.between(time, java.time.LocalTime.now());
+        this.duration = java.time.Duration.between(time, java.time.LocalTime.now());
         System.out.println("\nBanyak kasus yang ditinjau: " + counter);
-        System.out.println("\nWaktu pencarian: " + duration.toMillis() + " ms");
+        System.out.println("\nWaktu pencarian: " + duration.toMillis() + " ms\n");
     }
     public void print(){
         for (int i = 0; i < this.length; i++){

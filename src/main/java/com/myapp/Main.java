@@ -1,19 +1,29 @@
 package com.myapp;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import java.awt.image.BufferedImage;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -22,6 +32,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextBoundsType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javax.imageio.ImageIO;
 import puzzle.FileReader;
 import puzzle.Solver;
 
@@ -37,7 +48,10 @@ public class Main {
     private TextField colInput;
 
     @FXML
-    private GridPane gridContainer;
+    private Text filename;
+
+    @FXML
+    private ScrollPane gridContainer;
 
     @FXML
     private TextArea mapInput;
@@ -55,15 +69,14 @@ public class Main {
     private TextField rowInput;
 
     @FXML
-    private Text filename;
+    private Button saveButton;
+    
+    private VBox container;
 
-    FileChooser fileChooser = new FileChooser();
+    private FileChooser fileChooser = new FileChooser();
     private File inputFile;
-
-    FileReader reader = new FileReader();
-
-    Solver solver;
-
+    private FileReader reader = new FileReader();
+    private Solver solver;
     private final Map<Character, Color> colorMap = new HashMap<>();
 
     @FXML
@@ -79,8 +92,8 @@ public class Main {
             }
         });
         mapInputContainer.setDisable(true);
-        gridContainer.setVisible(false);
         initColor();
+        saveButton.setDisable(true);
     }  
     
     @FXML
@@ -121,7 +134,8 @@ public class Main {
 
     @FXML
     void onClickSolve(ActionEvent event) {
-        gridContainer.setVisible(false);
+        saveButton.setDisable(true);
+        gridContainer.setContent(null);
         alertMsg.setText("");
         alertMsg.setFill(Color.RED);
         reader.readInput(rowInput.getText(), colInput.getText(), modeInput.getValue(), numBlocksInput.getText(), blocksInput.getText(), mapInput.getText());
@@ -139,73 +153,160 @@ public class Main {
         else{
             solver = new Solver(reader.row, reader.col, reader.row, reader.blocks);
         }
-        solver.solve();
-        if (!solver.isSolved){
-            alertMsg.setText(solver.solveMsg);
-        }
-        else{
-            createGrid();
-            alertMsg.setFill(Color.GREEN);
-            alertMsg.setText("Banyak kasus ditinjau: " + solver.getCounter() + "                     Waktu Pencarian: " + solver.getDuration() + " ms");
-        }
+        container = new VBox(5);
+        container.setAlignment(Pos.CENTER);
+
+        Task<Void> solveTask = new Task<Void>() {
+            @Override
+            protected Void call() {
+                if (reader.mode.equals("DEFAULT")) {
+                    solver = new Solver(reader.row, reader.col, reader.blocks);
+                } 
+                else if (reader.mode.equals("CUSTOM")) {
+                    solver = new Solver(reader.row, reader.col, reader.map, reader.blocks);
+                } 
+                else {
+                    solver = new Solver(reader.row, reader.col, reader.row, reader.blocks);
+                }
+
+                solver.solve();  // Solve on background thread
+                return null;
+            }
+        };
+
+        // When solver.solve() finishes, update the UI on the JavaFX Application Thread
+        solveTask.setOnSucceeded(e -> {
+            if (!solver.isSolved) {
+                alertMsg.setFill(Color.RED);
+                alertMsg.setText(solver.solveMsg + "\nBanyak kasus ditinjau: " + solver.getCounter() + "                     Waktu Pencarian: " + solver.getDuration() + " ms");
+            } 
+            else {
+                container.getChildren().clear();
+                for (int k = solver.getHeight() - 1; k >= 0; k--) {
+                    GridPane grid = createGrid(k);
+                    container.getChildren().add(grid);
+                }
+
+                gridContainer.setContent(container);
+                container.setPrefHeight(Math.max(gridContainer.getHeight(), container.getHeight()));
+                container.setPrefWidth(Math.max(gridContainer.getWidth(), container.getWidth()));
+
+                alertMsg.setFill(Color.GREEN);
+                alertMsg.setText("Banyak kasus ditinjau: " + solver.getCounter() + "                     Waktu Pencarian: " + solver.getDuration() + " ms");
+                saveButton.setDisable(false);
+            }
+        });
+
+        solveTask.setOnFailed(e -> {
+            alertMsg.setText("Error: Failed to solve.");
+        });
+
+        Task<Void> setCounter = new Task<>() {
+            @Override
+            protected Void call() {
+                alertMsg.setFill(Color.BLACK);
+                while (!solveTask.isDone()) {
+                    // Update the UI safely
+                    Platform.runLater(() -> {
+                        container.getChildren().clear();
+                        for (int k = solver.getHeight() - 1; k >= 0; k--) {
+                            GridPane grid = createGrid(k);
+                            container.getChildren().add(grid);
+                        }
+        
+                        gridContainer.setContent(container);
+                        container.setPrefHeight(Math.max(gridContainer.getHeight(), container.getHeight()));
+                        container.setPrefWidth(Math.max(gridContainer.getWidth(), container.getWidth()));
+                        alertMsg.setText("Banyak kasus ditinjau: " + solver.getCounter());
+                    });
+
+                    try {
+                        Thread.sleep(100); // Small delay to prevent excessive UI updates
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                return null;
+            }
+        };
+
+        new Thread(solveTask).start();
+        new Thread(setCounter).start();
     }
 
-    private void createGrid(){
-        int size=25 ;
-        gridContainer.setVisible(true);
-        gridContainer.getChildren().clear(); // Clear previous grid if needed
-        gridContainer.setMaxWidth((size + 5)*solver.getWidth()+5);
-        gridContainer.setMaxHeight((size + 5)*solver.getLength()+5);
-        for (int row = 0; row < solver.getLength(); row++) {
-            for (int col = 0; col < solver.getWidth(); col++) {
+    @FXML
+    void onClickSaveRes(ActionEvent event) {
+        // Ensure JavaFX thread
+        Platform.runLater(() -> {
+            try {
+                // Capture snapshot
+                WritableImage image = container.snapshot(new SnapshotParameters(), null);
+
+                // Convert to BufferedImage manually
+                int width = (int) image.getWidth();
+                int height = (int) image.getHeight();
+                BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+                int[] buffer = new int[width * height];
+                image.getPixelReader().getPixels(0, 0, width, height, PixelFormat.getIntArgbInstance(), buffer, 0, width);
+                bufferedImage.setRGB(0, 0, width, height, buffer, 0, width);
+
+                // Save as PNG
+                ImageIO.write(bufferedImage, "png", new File("output.png"));
+                System.out.println("Image saved to: output.png");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private GridPane createGrid(int height){
+        int size=25, width = solver.getWidth() - height, length = solver.getLength() - height;
+        GridPane grid = new GridPane();
+        grid.setHgap(5); grid.setVgap(5);
+        grid.setPadding(new javafx.geometry.Insets(5));
+        grid.setAlignment(Pos.CENTER);
+        grid.setStyle("-fx-background-color: rgb(120,120,120); -fx-background-radius: 10px;");
+        grid.setMaxWidth((size + 5)*width+5);
+        grid.setMaxHeight((size + 5)*length+5);
+        for (int row = height; row < solver.getLength(); row++) {
+            for (int col = height; col < solver.getWidth(); col++) {
                 char letter;
-                if (solver.getMap()[row][col][0] > 0) {
-                    letter = (char) solver.getMap()[row][col][0];
+                if (solver.getMap()[row][col][height] > 0) {
+                    letter = (char) solver.getMap()[row][col][height];
+                }
+                else if (solver.getMap()[row][col][height] == -1){
+                    letter = '-';
                 }
                 else{
                     letter = '\0';
                 }
                 Color color = colorMap.getOrDefault(letter, Color.GRAY); // Default to gray if unknown
-
-
                 Rectangle rect = new Rectangle(size, size);
                 rect.setFill(color);
                 rect.setArcHeight(size * 0.9);
                 rect.setArcWidth(size * 0.9);
                 // Create the text
+                if (letter == '-') letter = '\0';
                 Text text = new Text(letter + "");
                 text.setFill(Color.WHITE); 
                 text.setFont(new Font(size * 0.5));  
-                text.setTextAlignment(TextAlignment.CENTER);  // Center text alignment
-                text.setBoundsType(TextBoundsType.VISUAL); // More accurate centering
+                text.setTextAlignment(TextAlignment.CENTER); 
+                text.setBoundsType(TextBoundsType.VISUAL); 
                 text.setStyle("-fx-font-weight: bold;");
 
                 // Stack rectangle and text together
                 StackPane stack = new StackPane();
                 stack.getChildren().addAll(rect, text);
                 stack.setAlignment(Pos.CENTER);
-                // // Create a clip (mask) to round only the left side
-                // Rectangle clip = new Rectangle(size, size);
-                // clip.setArcWidth(size * 0.9); // Round left side
-                // clip.setArcHeight(size * 0.9);
-                // clip.setX(-size * 0.5); // Shift clip to affect only one side
-                // Rectangle rect2 = new Rectangle(size, size);
-                // rect.setFill(color);
-                // Rectangle clip2 = new Rectangle(size, size);
-                // clip2.setArcWidth(size * 0.9); // Round left side
-                // clip2.setArcHeight(size * 0.9);
-                // clip2.setX(size * 0.5); // Shift clip to affect only one side
-
-                // rect.setClip(clip); // Apply the clip
-                // rect2.setClip(clip2); // Apply the clip
-                // Add the rectangle to the GridPane
-                gridContainer.add(stack, col, row);
-                // gridContainer.add(rect2, col, row);
+                grid.add(stack, col - height, row - height);
             }
         }
+        return grid;
     }
 
     private void initColor(){
+        colorMap.put('-', Color.rgb(120, 120, 120));
         colorMap.put('A', Color.BLUE);
         colorMap.put('B', Color.RED);
         colorMap.put('C', Color.GREEN);
