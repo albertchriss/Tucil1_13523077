@@ -253,16 +253,20 @@ public class Block {
     }
 
     public String getBlockAsString(){
-        boolean aktif = false;
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.length; i++){
+            int lastidx = -1;
             for (int j = this.width-1; j >= 0; j--){
                 if (this.block[i][j][0] > 0){
-                    sb.append((char) this.block[i][j][0]);
-                    aktif = true;
+                    lastidx = j;
+                    break;
                 }
-                else{
-                    if (aktif) sb.append(" ");
+            }
+            for (int j = 0; j <= lastidx; j++){
+                if (this.block[i][j][0] == 0){
+                    sb.append(" ");
+                } else {
+                    sb.append((char) this.block[i][j][0]);
                 }
             }
             sb.append("\n");
