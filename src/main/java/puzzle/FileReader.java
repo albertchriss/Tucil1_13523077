@@ -148,6 +148,10 @@ public class FileReader {
             this.errorMsg = "Invalid blocks input! Blocks must not be empty!";
             return false;
         }
+        boolean[] used = new boolean[26];
+        for (int i = 0; i < 26; i++){
+            used[i] = false;
+        }
         this.blocks = new Block[this.numBlocks];
         List<String> temp = new java.util.ArrayList<>();
         int j = 0;
@@ -180,6 +184,12 @@ public class FileReader {
                     block[k] = temp.get(k);
                 }
                 this.blocks[j] = new Block(block);
+                if (used[this.blocks[j].getColor() - 'A']){
+                    this.validInput = false;
+                    this.errorMsg = "Invalid blocks input! Duplicate block color!";
+                    return false;
+                }
+                used[this.blocks[j].getColor() - 'A'] = true;
                 j++;
                 temp.clear();
                 temp.add(blockLine);
@@ -196,6 +206,12 @@ public class FileReader {
                 block[k] = temp.get(k);
             }
             this.blocks[j] = new Block(block);
+            if (used[this.blocks[j].getColor() - 'A']){
+                this.validInput = false;
+                this.errorMsg = "Invalid blocks input! Duplicate block color!";
+                return false;
+            }
+            used[this.blocks[j].getColor() - 'A'] = true;
             temp.clear();
             j++;
         }
