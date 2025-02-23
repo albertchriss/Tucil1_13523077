@@ -3,6 +3,9 @@
 ## Deskripsi Program
 Program ini merupakan aplikasi pencari solusi dari permainan [**IQ Puzzler Pro**](https://www.smartgamesusa.com) dengan menggunakan algoritma _**Brute Force**_, atau menampilkan bahwa solusi tidak ditemukan jika tidak ada solusi yang mungkin dari puzzle.
 
+![clip](https://github.com/user-attachments/assets/16104990-f757-4390-8ebb-bcaa2989b713)
+
+
 ## Cara Menjalankan GUI
 1. Pastikan Java Development Kit (JDK) telah terinstall.
 2. Lakukan *clone* repository atau klik link berikut untuk melakukan proses [download](https://github.com/albertchriss/Tucil1_13523077/raw/refs/heads/main/iq-puzzler-solver.jar) file executable `iq-puzzler-solver.jar`.
