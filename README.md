@@ -36,3 +36,6 @@ Setelah melakukan setup Maven, cara menjalankan GUI adalah:
     ```
     java -cp bin puzzle/Main
     ```
+
+## Kontributor
+**Albertus Christian Poandy - 13523077**
