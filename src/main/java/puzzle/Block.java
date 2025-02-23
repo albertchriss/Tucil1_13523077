@@ -14,7 +14,15 @@ public class Block {
         this.width = width;
         this.size = Math.max(length, width)*2;
         this.block = new int[size][size][size];
-        this.color = (int) (input[0].charAt(0));
+        this.color = 0;
+        for (int i = 0; i < input.length; i++){
+            for (int j = 0; j < input[i].length(); j++){
+                if (Character.isLetter(input[i].charAt(j))){
+                    this.color = (int) (input[i].charAt(j));
+                    break;
+                }
+            }
+        }
 
         for (int i = 0; i < this.size; i++) {
             if (i >= length){
