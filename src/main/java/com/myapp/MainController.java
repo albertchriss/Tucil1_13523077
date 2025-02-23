@@ -68,7 +68,10 @@ public class MainController {
     private TextField rowInput;
 
     @FXML
-    private Button saveButton;
+    private Button saveButtonPng;
+
+    @FXML
+    private Button saveButtonTxt;
     
     private VBox container;
 
@@ -92,7 +95,8 @@ public class MainController {
         });
         mapInputContainer.setDisable(true);
         initColor();
-        saveButton.setDisable(true);
+        saveButtonPng.setDisable(true);
+        saveButtonTxt.setDisable(true);
     }  
     
     @FXML
@@ -134,7 +138,8 @@ public class MainController {
 
     @FXML
     void onClickSolve(ActionEvent event) {
-        saveButton.setDisable(true);
+        saveButtonTxt.setDisable(true);
+        saveButtonPng.setDisable(true);
         gridContainer.setContent(null);
         alertMsg.setText("");
         alertMsg.setFill(Color.RED);
@@ -193,7 +198,8 @@ public class MainController {
 
                 alertMsg.setFill(Color.GREEN);
                 alertMsg.setText("Banyak kasus ditinjau: " + solver.getCounter() + "                     Waktu Pencarian: " + solver.getDuration() + " ms");
-                saveButton.setDisable(false);
+                saveButtonPng.setDisable(false);
+                saveButtonTxt.setDisable(false);
             }
         });
 
@@ -235,7 +241,7 @@ public class MainController {
     }
 
     @FXML
-    void onClickSaveRes(ActionEvent event) {
+    void onClickSaveResPng(ActionEvent event) {
         // Set default file name and extension
         fileChooser.setInitialFileName("output.png");
         fileChooser.getExtensionFilters().clear();
@@ -266,6 +272,35 @@ public class MainController {
                     // Save as PNG
                     ImageIO.write(bufferedImage, "png", file);
                     System.out.println("Image saved to: " + file.getAbsolutePath());
+                } 
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    @FXML
+    void onClickSaveResTxt(ActionEvent event) {
+        // Set default file name and extension
+        fileChooser.setInitialFileName("output.txt");
+        fileChooser.getExtensionFilters().clear();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+        File initialDirectory = new File(".");
+        if (initialDirectory.exists()) {
+            fileChooser.setInitialDirectory(initialDirectory);
+        }
+        // Show save dialog
+        File file = fileChooser.showSaveDialog(new Stage());
+
+        if (file != null){
+            // Ensure JavaFX thread
+            String output = solver.getOutput();
+            Platform.runLater(() -> {
+                try {
+                    // Write to file
+                    java.nio.file.Files.write(file.toPath(), output.getBytes());
+                    System.out.println("Text saved to: " + file.getAbsolutePath());
                 } 
                 catch (IOException e) {
                     e.printStackTrace();

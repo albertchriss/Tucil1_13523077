@@ -355,7 +355,7 @@ public class Solver {
                 for (int i = k; i < this.length; i++){
                     for (int j = k; j < this.width; j++){
                         if (map[i][j][k] > 0)
-                            sb.append(getColorChar((char) this.map[i][j][k]));
+                            sb.append((char) this.map[i][j][k]);
                         else
                             sb.append(" ");
                     }
@@ -368,19 +368,16 @@ public class Solver {
             for (int i = 0; i < this.length; i++){
                 for (int j = 0; j < this.width; j++){
                     if (map[i][j][0] > 0)
-                        sb.append(getColorChar((char) this.map[i][j][0]));
+                        sb.append((char) this.map[i][j][0]);
                     else
                         sb.append(" ");
                 }
                 sb.append("\n");
             }
         }
+        sb.append("\nBanyak kasus yang ditinjau: " + counter + "\n");
+        sb.append("\nWaktu pencarian: " + duration.toMillis() + " ms\n");
         return sb.toString();
-    }
-
-    private String getColorChar(char c){
-        int colorCode = (c - 'A') + 1; 
-        return "\u001B[38;5;" + colorCode + "m" + c + "\u001B[0m";
     }
 
     private void colorPrint(char c){

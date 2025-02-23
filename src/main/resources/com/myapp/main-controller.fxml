@@ -57,6 +57,7 @@
             <Text fx:id="filename" strokeType="OUTSIDE" strokeWidth="0.0" />
          </children>
       </TextFlow>
-      <Button fx:id="saveButton" layoutX="39.0" layoutY="472.0" mnemonicParsing="false" onAction="#onClickSaveRes" prefHeight="26.0" prefWidth="166.0" text="Save result" />
+      <Button fx:id="saveButtonPng" layoutX="39.0" layoutY="472.0" mnemonicParsing="false" onAction="#onClickSaveResPng" prefHeight="26.0" prefWidth="76.0" text="Save PNG" />
+      <Button fx:id="saveButtonTxt" layoutX="129.0" layoutY="472.0" mnemonicParsing="false" onAction="#onClickSaveResTxt" prefHeight="26.0" prefWidth="76.0" text="Save TXT" />
    </children>
 </AnchorPane>
