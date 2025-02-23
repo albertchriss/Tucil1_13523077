@@ -1,0 +1,9 @@
+3 3 4
+PYRAMID
+AA
+AA
+CC
+DDD
+ D
+E
+EEE

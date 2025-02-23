@@ -52,8 +52,6 @@ public class FileReader {
 
             List<String> blockLines = lines.subList(startBlockIdx, lines.size());
             if (!parseBlocks(blockLines)){
-                this.validInput = false;
-                this.errorMsg = "Invalid blocks input!";
                 return;
             }
         } 

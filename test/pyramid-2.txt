@@ -1,0 +1,19 @@
+4 4 11
+PYRAMID
+A
+AA
+BB
+CC
+DDD
+E
+EEE
+FF
+GG
+ GG
+HH
+H
+H
+II
+I
+J
+KK
